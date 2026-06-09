@@ -2,7 +2,7 @@
 
 Desktop-приложение и backend для платформы real-time коммуникаций: мессенджер с E2E-шифрованием, модуль antifraud, далее — голос, стримы и экономика.
 
-**Стек:** Go (monolith API), Wails + React (desktop), PostgreSQL, Redis (позже).
+**Стек:** Go (Chat API + Центр Безопасности), Wails + React (desktop), PostgreSQL, Redis (позже).
 
 ---
 
@@ -10,16 +10,19 @@ Desktop-приложение и backend для платформы real-time ко
 
 ```
 .
-├── server/          # Go API monolith (deploy на сервер)
-│   ├── cmd/api/     # точка входа API
-│   ├── internal/    # модули: users, e2e, antifraud, gateway, …
-│   └── migrations/  # SQL-миграции PostgreSQL
-├── desktop/         # Wails desktop client (Go + React)
-│   ├── internal/    # crypto (E2E), fingerprint, HTTP-клиент к API
-│   └── frontend/    # React UI
-├── shared/          # общие DTO и модели (Go)
-└── docs/
-    └── architecture/  # trust boundaries, модули, диаграммы
+├── server/              # Chat API (модульный монолит)
+│   ├── cmd/api/
+│   ├── internal/        # users, e2e, gateway, chats
+│   └── migrations/
+├── security-center/     # Центр Безопасности (отдельный бинарник)
+│   ├── cmd/security/
+│   ├── internal/        # ingest, graph, admin
+│   └── migrations/
+├── desktop/             # Wails desktop client (Go + React)
+│   ├── internal/        # crypto (E2E), fingerprint, gRPC-клиент
+│   └── frontend/        # React UI
+├── shared/              # proto-контракты и общие модели (Go)
+└── docs/                # документация проекта
 ```
 
 ---
@@ -30,7 +33,7 @@ Desktop-приложение и backend для платформы real-time ко
 |--------|---------------|----------------|----------|
 | users | `server/internal/users` | — | общий |
 | e2e | `server/internal/e2e` | `desktop/internal/crypto` | Петя |
-| antifraud | `server/internal/antifraud` | `desktop/internal/fingerprint` | Sudeeneess |
+| Центр Безопасности | `security-center/` | `desktop/internal/fingerprint` | Sudeeneess |
 | gateway | `server/internal/gateway` | — | общий |
 
 Склейка модулей — через `users.id`. Private keys и plaintext сообщений **только на клиенте**.
@@ -109,12 +112,14 @@ wails dev
 
 ## Архитектура
 
-- **Модульный монолит** на Go — users, e2e, antifraud в одном процессе
-- **Desktop** — Wails: React (UI) + Go (crypto, fingerprint, API client)
+- **Chat API** — модульный монолит на Go (users, e2e, gateway, chats)
+- **Центр Безопасности** — отдельный бинарник; собирает связи между аккаунтами, автономен от чатов
+- **Связь** — Chat API → Центр Безопасности по gRPC (`IngestEvent`, async)
+- **Desktop** — Wails: React (UI) + Go (crypto, fingerprint, gRPC client)
 - **E2E** — Double Ratchet (Signal Protocol), сервер хранит только ciphertext и public prekeys
 - **Сателлиты (позже):** mediasoup (C++), ML-модерация (Python) — через gRPC
 
-Документы: `docs/architecture/`
+Документы: [`docs/`](docs/README.md)
 
 ---
 
