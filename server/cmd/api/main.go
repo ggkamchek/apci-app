@@ -4,15 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	usersv1 "github.com/black/apci-app/server/pkg/pb/apci/users/v1"
 	"github.com/black/apci-app/server/internal/config"
 	"github.com/black/apci-app/server/internal/db"
+	"github.com/black/apci-app/server/internal/migrate"
+	"github.com/black/apci-app/server/internal/users"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type healthResponse struct {
@@ -33,19 +39,43 @@ func main() {
 	}
 	defer pool.Close()
 
+	if err := migrate.Up(ctx, pool, cfg.MigrationsDir); err != nil {
+		log.Fatalf("migrate: %v", err)
+	}
+
+	userRepo := users.NewRepository(pool)
+	userService := users.NewService(userRepo, cfg.ChallengeTTL, cfg.SessionTTL)
+	userGRPC := users.NewGRPCServer(userService)
+
+	grpcServer := grpc.NewServer()
+	usersv1.RegisterUsersServiceServer(grpcServer, userGRPC)
+	reflection.Register(grpcServer)
+
+	grpcListener, err := net.Listen("tcp", cfg.GRPCAddr)
+	if err != nil {
+		log.Fatalf("grpc listen: %v", err)
+	}
+
+	go func() {
+		log.Printf("grpc listening on %s", cfg.GRPCAddr)
+		if err := grpcServer.Serve(grpcListener); err != nil {
+			log.Fatalf("grpc server: %v", err)
+		}
+	}()
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", healthHandler(pool))
 
-	server := &http.Server{
+	httpServer := &http.Server{
 		Addr:              cfg.ServerAddr,
 		Handler:           mux,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	go func() {
-		log.Printf("api listening on %s", cfg.ServerAddr)
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("server: %v", err)
+		log.Printf("http listening on %s", cfg.ServerAddr)
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("http server: %v", err)
 		}
 	}()
 
@@ -56,8 +86,10 @@ func main() {
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := server.Shutdown(shutdownCtx); err != nil {
-		log.Printf("shutdown: %v", err)
+	grpcServer.GracefulStop()
+
+	if err := httpServer.Shutdown(shutdownCtx); err != nil {
+		log.Printf("http shutdown: %v", err)
 	}
 }
 

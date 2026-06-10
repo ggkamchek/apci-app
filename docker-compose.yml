@@ -28,9 +28,14 @@ services:
         condition: service_healthy
     environment:
       SERVER_ADDR: ${SERVER_ADDR:-:8080}
+      GRPC_ADDR: ${GRPC_ADDR:-:50051}
       DATABASE_URL: postgres://${POSTGRES_USER:-platform}:${POSTGRES_PASSWORD:-platform}@postgres:5432/${POSTGRES_DB:-platform}?sslmode=disable
+      CHALLENGE_TTL: ${CHALLENGE_TTL:-60s}
+      SESSION_TTL: ${SESSION_TTL:-24h}
+      MIGRATIONS_DIR: migrations
     ports:
       - "${API_PORT:-8080}:8080"
+      - "${GRPC_PORT:-50051}:50051"
 
 volumes:
   pgdata:

@@ -3,17 +3,36 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 type Config struct {
-	ServerAddr  string
-	DatabaseURL string
+	ServerAddr    string
+	GRPCAddr      string
+	DatabaseURL   string
+	MigrationsDir string
+	ChallengeTTL  time.Duration
+	SessionTTL    time.Duration
 }
 
 func Load() (Config, error) {
+	challengeTTL, err := parseDurationEnv("CHALLENGE_TTL", 60*time.Second)
+	if err != nil {
+		return Config{}, err
+	}
+
+	sessionTTL, err := parseDurationEnv("SESSION_TTL", 24*time.Hour)
+	if err != nil {
+		return Config{}, err
+	}
+
 	cfg := Config{
-		ServerAddr:  envOrDefault("SERVER_ADDR", ":8080"),
-		DatabaseURL: os.Getenv("DATABASE_URL"),
+		ServerAddr:    envOrDefault("SERVER_ADDR", ":8080"),
+		GRPCAddr:      envOrDefault("GRPC_ADDR", ":50051"),
+		DatabaseURL:   os.Getenv("DATABASE_URL"),
+		MigrationsDir: envOrDefault("MIGRATIONS_DIR", "migrations"),
+		ChallengeTTL:  challengeTTL,
+		SessionTTL:    sessionTTL,
 	}
 
 	if cfg.DatabaseURL == "" {
@@ -28,4 +47,17 @@ func envOrDefault(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+func parseDurationEnv(key string, fallback time.Duration) (time.Duration, error) {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback, nil
+	}
+
+	duration, err := time.ParseDuration(value)
+	if err != nil {
+		return 0, fmt.Errorf("%s must be a valid duration: %w", key, err)
+	}
+	return duration, nil
 }

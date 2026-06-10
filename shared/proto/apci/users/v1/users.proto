@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package apci.users.v1;
+
+option go_package = "github.com/black/apci-app/server/pkg/pb/apci/users/v1;usersv1";
+
+service UsersService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc BeginLogin(BeginLoginRequest) returns (BeginLoginResponse);
+  rpc CompleteLogin(CompleteLoginRequest) returns (CompleteLoginResponse);
+}
+
+message RegisterRequest {
+  string username = 1;
+  bytes ed25519_public_key = 2;
+  string device_hash = 3;
+}
+
+message RegisterResponse {
+  string user_id = 1;
+  string username = 2;
+}
+
+message BeginLoginRequest {
+  string username = 1;
+}
+
+message BeginLoginResponse {
+  string challenge_id = 1;
+  bytes challenge = 2;
+}
+
+message CompleteLoginRequest {
+  string username = 1;
+  string challenge_id = 2;
+  bytes signature = 3;
+  string device_hash = 4;
+}
+
+message CompleteLoginResponse {
+  string session_id = 1;
+  string user_id = 2;
+  string username = 3;
+}

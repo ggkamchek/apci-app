@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>APCI</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div id="auth-screen" class="screen">
+        <div class="card">
+            <h1 class="logo">APCI</h1>
+            <p class="subtitle" id="auth-subtitle">Вход в аккаунт</p>
+
+            <label class="field">
+                <span>Имя пользователя</span>
+                <input id="username" type="text" placeholder="например, lera" autocomplete="username" />
+            </label>
+
+            <p id="error" class="error hidden"></p>
+
+            <button id="submit-btn" class="btn primary" type="button">Войти</button>
+
+            <button id="toggle-mode" class="btn link" type="button">
+                Нет аккаунта? Зарегистрироваться
+            </button>
+        </div>
+    </div>
+
+    <div id="main-screen" class="screen hidden">
+        <div class="card main-card">
+            <h1 class="logo">APCI</h1>
+            <p class="welcome">Привет, <strong id="display-username"></strong>!</p>
+            <p class="meta">ID: <span id="display-userid"></span></p>
+            <p class="meta">Сессия активна</p>
+            <button id="logout-btn" class="btn secondary" type="button">Выйти</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

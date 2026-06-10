@@ -20,6 +20,6 @@ WORKDIR /app
 COPY --from=builder /api /app/api
 COPY migrations /app/migrations
 
-EXPOSE 8080
+EXPOSE 8080 50051
 
 CMD ["/app/api"]
