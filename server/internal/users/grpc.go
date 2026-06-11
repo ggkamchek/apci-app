@@ -10,13 +10,22 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type GRPCServer struct {
-	usersv1.UnimplementedUsersServiceServer
-	service *Service
+type EventPublisher interface {
+	PublishUserRegistered(userID, deviceHash string)
+	PublishUserLoggedIn(userID, deviceHash string)
 }
 
-func NewGRPCServer(service *Service) *GRPCServer {
-	return &GRPCServer{service: service}
+type GRPCServer struct {
+	usersv1.UnimplementedUsersServiceServer
+	service   *Service
+	publisher EventPublisher
+}
+
+func NewGRPCServer(service *Service, publisher EventPublisher) *GRPCServer {
+	return &GRPCServer{
+		service:   service,
+		publisher: publisher,
+	}
 }
 
 func (s *GRPCServer) Register(ctx context.Context, req *usersv1.RegisterRequest) (*usersv1.RegisterResponse, error) {
@@ -27,6 +36,10 @@ func (s *GRPCServer) Register(ctx context.Context, req *usersv1.RegisterRequest)
 	})
 	if err != nil {
 		return nil, mapError(err)
+	}
+
+	if s.publisher != nil {
+		s.publisher.PublishUserRegistered(result.UserID, req.GetDeviceHash())
 	}
 
 	return &usersv1.RegisterResponse{
@@ -56,6 +69,10 @@ func (s *GRPCServer) CompleteLogin(ctx context.Context, req *usersv1.CompleteLog
 	})
 	if err != nil {
 		return nil, mapError(err)
+	}
+
+	if s.publisher != nil {
+		s.publisher.PublishUserLoggedIn(result.UserID, req.GetDeviceHash())
 	}
 
 	return &usersv1.CompleteLoginResponse{

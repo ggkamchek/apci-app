@@ -39,7 +39,7 @@
 |---------|----------|
 | Приём событий | От Chat API по gRPC (`IngestEvent`) |
 | Фиксация связей | Между аккаунтами в собственной БД |
-| Типы связей | `same_device`, `same_ip`, `shared_contact`, `communicates_with` |
+| Типы связей | `same_device`, `shared_contact`, `communicates_with` |
 | Admin API | Отдача таблицы связей в интерфейс администратора |
 | Админка | Таблица: Аккаунт A — Аккаунт B — Тип — Вес — Дата |
 
@@ -47,8 +47,8 @@
 
 | Событие | Когда | Данные |
 |---------|-------|--------|
-| `user.registered` | После успешной регистрации | `user_id`, `device_hash`, `ip_hash` |
-| `user.logged_in` | После успешного входа | `user_id`, `device_hash`, `ip_hash` |
+| `user.registered` | После успешной регистрации | `user_id`, `device_hash` |
+| `user.logged_in` | После успешного входа | `user_id`, `device_hash` |
 | `contact.added` | После добавления контакта | `user_id`, `contact_id` |
 | `message.sent` | После сохранения ciphertext | `from`, `to`, `message_id`, `timestamp` |
 

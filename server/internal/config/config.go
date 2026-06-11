@@ -7,12 +7,13 @@ import (
 )
 
 type Config struct {
-	ServerAddr    string
-	GRPCAddr      string
-	DatabaseURL   string
-	MigrationsDir string
-	ChallengeTTL  time.Duration
-	SessionTTL    time.Duration
+	ServerAddr          string
+	GRPCAddr            string
+	DatabaseURL         string
+	MigrationsDir       string
+	ChallengeTTL        time.Duration
+	SessionTTL          time.Duration
+	SecurityCenterAddr  string
 }
 
 func Load() (Config, error) {
@@ -27,12 +28,13 @@ func Load() (Config, error) {
 	}
 
 	cfg := Config{
-		ServerAddr:    envOrDefault("SERVER_ADDR", ":8080"),
-		GRPCAddr:      envOrDefault("GRPC_ADDR", ":50051"),
-		DatabaseURL:   os.Getenv("DATABASE_URL"),
-		MigrationsDir: envOrDefault("MIGRATIONS_DIR", "migrations"),
-		ChallengeTTL:  challengeTTL,
-		SessionTTL:    sessionTTL,
+		ServerAddr:         envOrDefault("SERVER_ADDR", ":8080"),
+		GRPCAddr:           envOrDefault("GRPC_ADDR", ":50051"),
+		DatabaseURL:        os.Getenv("DATABASE_URL"),
+		MigrationsDir:      envOrDefault("MIGRATIONS_DIR", "migrations"),
+		ChallengeTTL:       challengeTTL,
+		SessionTTL:         sessionTTL,
+		SecurityCenterAddr: os.Getenv("SECURITY_CENTER_ADDR"),
 	}
 
 	if cfg.DatabaseURL == "" {

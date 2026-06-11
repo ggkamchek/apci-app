@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/black/apci-app/desktop/internal/auth"
+	"github.com/black/apci-app/desktop/internal/fingerprint"
 )
 
 type App struct {
@@ -48,6 +49,12 @@ func (a *App) startup(ctx context.Context) {
 func (a *App) shutdown(context.Context) {
 	if a.client != nil {
 		_ = a.client.Close()
+	}
+}
+
+func (a *App) SetFingerprintSignals(signals fingerprint.Signals) {
+	if a.client != nil {
+		a.client.SetFingerprintSignals(signals)
 	}
 }
 

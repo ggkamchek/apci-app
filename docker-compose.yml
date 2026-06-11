@@ -37,5 +37,24 @@ services:
       - "${API_PORT:-8080}:8080"
       - "${GRPC_PORT:-50051}:50051"
 
+  postgres-security:
+    image: postgres:16-alpine
+    container_name: platform-postgres-security
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_SECURITY_USER:-security}
+      POSTGRES_PASSWORD: ${POSTGRES_SECURITY_PASSWORD:-security}
+      POSTGRES_DB: ${POSTGRES_SECURITY_DB:-security}
+    ports:
+      - "${POSTGRES_SECURITY_PORT:-5434}:5432"
+    volumes:
+      - pgdata-security:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_SECURITY_USER:-security} -d ${POSTGRES_SECURITY_DB:-security}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   pgdata:
+  pgdata-security:

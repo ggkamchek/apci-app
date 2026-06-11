@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APCI — Центр Безопасности</title>
+    <link rel="stylesheet" href="css/console.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+    <div id="login-screen" class="login-screen">
+        <div class="login-card">
+            <div class="login-logo" aria-hidden="true">apci<span>:security</span></div>
+            <div class="widget-header">
+                <span class="widget-title">Центр Безопасности</span>
+                <span class="widget-badge live">ADMIN</span>
+            </div>
+            <p class="login-subtitle">Вход администратора · введите токен доступа</p>
+            <label class="login-field">
+                <span class="profile-label">Токен доступа</span>
+                <input id="token-input" class="input login-input" type="password" placeholder="dev-admin-token" autocomplete="current-password">
+            </label>
+            <p id="login-error" class="login-error hidden"></p>
+            <button id="login-btn" class="btn primary login-btn" type="button">Войти</button>
+        </div>
+    </div>
+
+    <div id="console-app" class="hidden">
+
+        <nav class="nav">
+            <button type="button" class="nav-logo" id="navHome" aria-label="На главную">
+                apci<span>:security</span>
+            </button>
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-screen="dashboard">Обзор</button>
+                <button class="nav-tab" data-screen="hashes">Устройства</button>
+                <button class="nav-tab" data-screen="links">Связи</button>
+                <button class="nav-tab" data-screen="investigation">Расследование</button>
+                <button class="nav-tab" data-screen="diff">Сравнение</button>
+            </div>
+            <div class="nav-actions">
+                <div class="nav-status" id="navStatus" title="Статус сервера">
+                    <span class="dot"></span>
+                </div>
+                <button id="logout-btn" class="btn link nav-logout" type="button">Выйти</button>
+            </div>
+        </nav>
+
+        <div class="main">
+
+            <section class="screen active" id="screen-dashboard">
+                <div class="grid">
+                    <div class="grid-item col-3">
+                        <div class="widget-header">
+                            <span class="widget-title">Обнаружено за час</span>
+                            <span class="widget-badge live">LIVE</span>
+                        </div>
+                        <div class="counter red" id="counterHourly">—</div>
+                        <div class="counter-label">новых связей (без IP)</div>
+                    </div>
+                    <div class="grid-item col-3">
+                        <div class="widget-header">
+                            <span class="widget-title">Аккаунтов</span>
+                        </div>
+                        <div class="counter cyan" id="counterTotal">—</div>
+                        <div class="counter-label">в графе</div>
+                    </div>
+                    <div class="grid-item col-3">
+                        <div class="widget-header">
+                            <span class="widget-title">Устройств с клонами</span>
+                        </div>
+                        <div class="counter green" id="counterUnique">—</div>
+                        <div class="counter-label">2+ аккаунта</div>
+                    </div>
+                    <div class="grid-item col-3">
+                        <div class="widget-header">
+                            <span class="widget-title">Связей</span>
+                        </div>
+                        <div class="counter amber" id="counterEntropy">—</div>
+                        <div class="counter-label">same_device и др.</div>
+                    </div>
+                    <div class="grid-item col-6">
+                        <div class="widget-header">
+                            <span class="widget-title">Лента рисков</span>
+                            <span class="widget-badge alert">КЛОНЫ</span>
+                        </div>
+                        <div class="fingerprint-card-list" id="topClonesCards">
+                            <div class="empty-state">Загрузка...</div>
+                        </div>
+                    </div>
+                    <div class="grid-item col-6">
+                        <div class="widget-header">
+                            <span class="widget-title">Активность за 24 часа</span>
+                        </div>
+                        <div class="graph-container" id="entropyChart"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="screen" id="screen-hashes">
+                <div class="grid">
+                    <div class="grid-item col-12">
+                        <div class="widget-header">
+                            <span class="widget-title">Реестр устройств</span>
+                            <span class="widget-badge live" id="hashesSummary">хеш устройства</span>
+                        </div>
+                        <div class="hash-filter-bar mb-16">
+                            <button class="btn hash-filter-btn active" type="button" data-hash-filter="clone">Клоны</button>
+                            <button class="btn hash-filter-btn" type="button" data-hash-filter="suspicious">Подозрительные</button>
+                            <button class="btn hash-filter-btn" type="button" data-hash-filter="clean">Чистые</button>
+                            <button class="btn hash-filter-btn" type="button" data-hash-filter="all">Все</button>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="hash-registry-table">
+                                <thead>
+                                    <tr>
+                                        <th>Хеш устройства</th>
+                                        <th>Аккаунтов</th>
+                                        <th>Записей</th>
+                                        <th>Последняя активность</th>
+                                        <th>Риск</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hashesTableBody">
+                                    <tr><td colspan="5" class="muted">Загрузка...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="screen" id="screen-links">
+                <div class="grid">
+                    <div class="grid-item col-12">
+                        <div class="widget-header">
+                            <span class="widget-title">Граф связей</span>
+                            <span class="widget-badge live" id="linksSummary">устройство</span>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="hash-registry-table">
+                                <thead>
+                                    <tr>
+                                        <th>Аккаунт A</th>
+                                        <th>Аккаунт B</th>
+                                        <th>Тип</th>
+                                        <th>Вес</th>
+                                        <th>Обнаружено</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="linksTableBody">
+                                    <tr><td colspan="5" class="muted">Загрузка...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="screen" id="screen-investigation">
+                <div class="omnibox">
+                    <span class="omnibox-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                    </span>
+                    <input type="text" class="input" id="investigationSearch" placeholder="UUID аккаунта или хеш устройства (можно начало хеша)...">
+                </div>
+                <div class="grid" id="investigationResult" style="display:none;"></div>
+                <div id="investigationPlaceholder" class="grid-item col-12" style="text-align:center; padding:60px; color:var(--text-muted);">
+                    Введите UUID аккаунта или хеш устройства
+                </div>
+            </section>
+
+            <section class="screen" id="screen-diff">
+                <div class="grid">
+                    <div class="grid-item col-12">
+                        <div class="widget-header">
+                            <span class="widget-title">Сравнение аккаунтов</span>
+                        </div>
+                        <div class="btn-group mb-16">
+                            <input type="text" class="input" id="diffIdA" placeholder="UUID аккаунта A">
+                            <input type="text" class="input" id="diffIdB" placeholder="UUID аккаунта B">
+                            <button class="btn compare" type="button" onclick="Diff.compare()">Сравнить</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="diff-columns" id="diffColumns" style="display:none;">
+                    <div class="diff-col" id="diffColA">
+                        <div class="widget-title mb-16">Аккаунт A</div>
+                        <div id="diffContentA"></div>
+                    </div>
+                    <div class="diff-col" id="diffColB">
+                        <div class="widget-title mb-16">Аккаунт B</div>
+                        <div id="diffContentB"></div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="toast-container" id="toastContainer"></div>
+    </div>
+
+    <script src="js/background.js"></script>
+    <script src="lib/d3.v7.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/hashes.js"></script>
+    <script src="js/links.js"></script>
+    <script src="js/investigation.js"></script>
+    <script src="js/diff.js"></script>
+</body>
+</html>

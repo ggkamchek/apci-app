@@ -58,6 +58,8 @@ async function handleSubmit() {
     showError('');
 
     try {
+        await initFingerprint();
+
         const result = isRegisterMode
             ? await window.go.main.App.Register(username)
             : await window.go.main.App.Login(username);
@@ -94,3 +96,4 @@ logoutBtn.addEventListener('click', handleLogout);
 
 updateModeUI();
 showAuthScreen();
+initFingerprint();

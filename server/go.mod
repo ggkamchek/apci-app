@@ -3,11 +3,15 @@ module github.com/black/apci-app/server
 go 1.25.0
 
 require (
+	github.com/black/apci-app/security-center v0.0.0
+	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.4
 	golang.org/x/crypto v0.48.0
 	google.golang.org/grpc v1.81.1
 	google.golang.org/protobuf v1.36.11
 )
+
+replace github.com/black/apci-app/security-center => ../security-center
 
 require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect

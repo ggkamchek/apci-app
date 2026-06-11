@@ -1,0 +1,849 @@
+:root {
+    --bg-deep: #0F1117;
+    --bg-panel: #1A1D24;
+    --bg-elevated: #22262F;
+    --water-surface: linear-gradient(
+        165deg,
+        rgba(0, 0, 0, 0.42) 0%,
+        rgba(0, 0, 0, 0.28) 100%
+    );
+    --water-surface-hover: linear-gradient(
+        165deg,
+        rgba(0, 0, 0, 0.52) 0%,
+        rgba(0, 0, 0, 0.36) 100%
+    );
+    --water-card: linear-gradient(
+        165deg,
+        rgba(0, 0, 0, 0.48) 0%,
+        rgba(0, 0, 0, 0.32) 100%
+    );
+    --water-card-hover: linear-gradient(
+        165deg,
+        rgba(0, 0, 0, 0.58) 0%,
+        rgba(0, 0, 0, 0.40) 100%
+    );
+    --water-border: rgba(255, 255, 255, 0.08);
+    --water-border-hover: rgba(255, 255, 255, 0.12);
+    --water-blur: none;
+    --water-shine: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    --water-glow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    --water-glow-hover: 0 12px 40px rgba(0, 0, 0, 0.42);
+    --border: #2A2E38;
+    --border-active: #2A2E38;
+
+    --text-primary: #E8EDF2;
+    --text-secondary: #8B95A5;
+    --text-muted: #8B95A5;
+
+    --accent: #2D8F6E;
+    --accent-hover: #3BAF88;
+    --accent-green: #2D8F6E;
+    --accent-cyan: #2D8F6E;
+    --accent-amber: #F4A261;
+    --accent-red: #E76F51;
+    --accent-purple: #2D8F6E;
+
+    --risk-clean: #5A6B7C;
+    --risk-suspicious: #F4A261;
+    --risk-clone: #E76F51;
+    --risk-neutral: #8B95A5;
+    --color-clean: #5A6B7C;
+    --color-suspicious: #F4A261;
+    --color-clone: #E76F51;
+
+    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 16px;
+    --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-card-hover: 0 10px 24px rgba(0, 0, 0, 0.42);
+    --transition: 0.2s ease;
+}
+
+html {
+    min-height: 100%;
+    background: var(--bg-deep);
+}
+
+body {
+    min-height: 100vh;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 14px;
+}
+
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.nav {
+    height: 64px;
+    background: var(--water-surface);
+    border-bottom: 1px solid var(--water-border);
+    box-shadow: var(--water-glow), var(--water-shine);
+    -webkit-backdrop-filter: var(--water-blur);
+    backdrop-filter: var(--water-blur);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.main,
+.toast-container {
+    position: relative;
+}
+
+.glass-surface,
+.main .grid-item,
+.diff-col,
+.omnibox {
+    background: var(--water-surface);
+    border: 1px solid var(--water-border);
+    border-radius: 16px;
+    box-shadow: var(--water-glow), var(--water-shine);
+    -webkit-backdrop-filter: var(--water-blur);
+    backdrop-filter: var(--water-blur);
+}
+
+/* внутри плашек — без второго слоя, чтобы фон просвечивал */
+.grid-item .graph-container,
+.grid-item .empty-state {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+.nav-logo {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 32px 0 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    cursor: pointer;
+    transition: color var(--transition), transform var(--transition);
+}
+
+.nav-logo:hover {
+    color: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.nav-logo span,
+.nav-status {
+    color: var(--text-secondary);
+}
+
+.nav-logo:hover span {
+    color: var(--text-primary);
+}
+
+.nav-tab {
+    color: var(--text-secondary);
+    font-size: 13px;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-tab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.nav-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.nav-status .dot {
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(45, 143, 110, 0.75);
+}
+
+.main {
+    padding: 32px;
+}
+
+.grid {
+    gap: 20px;
+}
+
+.main .grid-item {
+    padding: 22px;
+    transition: transform var(--transition), box-shadow var(--transition), background var(--transition), border-color var(--transition);
+}
+
+.main .grid-item:hover {
+    transform: translateY(-2px);
+    background: var(--water-surface-hover);
+    border-color: var(--water-border-hover);
+    box-shadow: var(--water-glow-hover), var(--water-shine);
+}
+
+.profile-card {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.toast {
+    background: rgba(26, 29, 36, 0.92);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+.widget-title {
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.widget-badge {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+}
+
+.widget-badge.live {
+    color: var(--accent);
+    background: rgba(45, 143, 110, 0.12);
+    border-color: rgba(45, 143, 110, 0.35);
+}
+
+.widget-badge.alert {
+    color: var(--risk-clone);
+    background: rgba(231, 111, 81, 0.12);
+    border-color: rgba(231, 111, 81, 0.35);
+}
+
+.counter {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.counter.red {
+    color: var(--risk-clone);
+}
+
+.counter.amber {
+    color: var(--risk-suspicious);
+}
+
+.counter.green,
+.counter.cyan {
+    color: var(--accent);
+}
+
+.counter-label,
+.muted,
+.profile-label,
+.related-card-reason {
+    color: var(--text-secondary);
+}
+
+.btn {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: var(--font-ui);
+    transition: transform var(--transition), background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    background: var(--bg-elevated);
+    border-color: var(--accent);
+    color: var(--accent-hover);
+}
+
+.btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0F1117;
+    font-weight: 600;
+}
+
+.btn.primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: #0F1117;
+}
+
+.btn.compare {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+    border-radius: 8px;
+}
+
+.btn.compare:hover {
+    background: rgba(45, 143, 110, 0.12);
+    color: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.input {
+    background: linear-gradient(
+        165deg,
+        rgba(0, 0, 0, 0.38) 0%,
+        rgba(0, 0, 0, 0.24) 100%
+    );
+    border: 1px solid var(--water-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: var(--water-shine);
+}
+
+.input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(45, 143, 110, 0.16);
+}
+
+.omnibox {
+    box-shadow: var(--shadow-card);
+}
+
+.omnibox .input {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.omnibox:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(45, 143, 110, 0.16), var(--shadow-card);
+}
+
+.omnibox-icon {
+    color: var(--accent);
+}
+
+.hash-text,
+.hash-link,
+.related-card-hash {
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    word-break: break-all;
+}
+
+.hash-link {
+    display: inline;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    text-align: left;
+}
+
+.hash-link:hover {
+    color: var(--accent-hover);
+}
+
+.fingerprint-card-list,
+.related-card-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.related-card {
+    position: relative;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
+    min-height: 86px;
+    padding: 16px 18px 16px 22px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+}
+
+.related-card:hover {
+    transform: translateY(-2px);
+    background: var(--bg-elevated);
+    box-shadow: var(--shadow-card-hover);
+}
+
+.fingerprint-card {
+    position: relative;
+    z-index: 0;
+    display: flex;
+    gap: 0;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: visible;
+    min-height: 86px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    cursor: pointer;
+    transition: transform 300ms ease;
+}
+
+.fingerprint-card:hover {
+    transform: translateY(-2px);
+}
+
+.fingerprint-avatar-wrap {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    background: var(--water-card);
+    border: 1px solid var(--water-border);
+    border-radius: 50%;
+    box-shadow: var(--water-glow), var(--water-shine);
+    -webkit-backdrop-filter: var(--water-blur);
+    backdrop-filter: var(--water-blur);
+    transition: background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}
+
+.fingerprint-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: block;
+}
+
+.avatar-status-dot {
+    position: absolute;
+    right: 0;
+    bottom: 2px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(15, 17, 23, 0.65);
+    border-radius: 50%;
+    background: var(--risk-neutral);
+    transition: border-color 300ms ease;
+}
+
+.fingerprint-card:hover .avatar-status-dot {
+    border-color: rgba(15, 17, 23, 0.75);
+}
+
+.avatar-status-dot.status-clean {
+    background: var(--risk-clean);
+}
+
+.avatar-status-dot.status-suspicious {
+    background: var(--risk-suspicious);
+}
+
+.avatar-status-dot.status-clone {
+    background: var(--risk-clone);
+}
+
+.fingerprint-card-panel {
+    --avatar-size: 52px;
+    --avatar-radius: calc(var(--avatar-size) / 2);
+    --panel-notch: calc(var(--avatar-radius) + 1px);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+    min-height: 74px;
+    /* плашка начинается от центра аватара — вырез сразу на левом краю, без «прямого» префикса */
+    margin-left: calc(var(--avatar-radius) * -1);
+    padding: 14px 16px 14px calc(var(--avatar-radius) + 14px);
+    background: var(--water-card);
+    border: 1px solid var(--water-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--water-glow), var(--water-shine);
+    -webkit-backdrop-filter: var(--water-blur);
+    backdrop-filter: var(--water-blur);
+    -webkit-mask-image: radial-gradient(
+        circle var(--panel-notch) at 0 50%,
+        transparent calc(var(--panel-notch) - 0.5px),
+        #000 var(--panel-notch)
+    );
+    mask-image: radial-gradient(
+        circle var(--panel-notch) at 0 50%,
+        transparent calc(var(--panel-notch) - 0.5px),
+        #000 var(--panel-notch)
+    );
+    transition: background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}
+
+.fingerprint-card:hover .fingerprint-avatar-wrap,
+.fingerprint-card:hover .fingerprint-card-panel {
+    background: var(--water-card-hover);
+    border-color: var(--water-border-hover);
+    box-shadow: var(--water-glow-hover), var(--water-shine);
+}
+
+.fingerprint-card-body {
+    display: grid;
+    gap: 8px;
+    max-width: calc(100% - 130px);
+    padding-right: 16px;
+}
+
+.fingerprint-card-meta {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.risk-badge,
+.verdict {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: max-content;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border: 1px solid transparent;
+    box-shadow: var(--water-shine);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.risk-badge::before,
+.verdict::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+.fingerprint-card .risk-badge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+}
+
+.risk-badge.badge-clean,
+.risk-badge.risk-clean {
+    color: #9AABBC;
+    background: linear-gradient(
+        165deg,
+        rgba(0, 0, 0, 0.52) 0%,
+        rgba(0, 0, 0, 0.36) 100%
+    );
+    border-color: rgba(90, 107, 124, 0.35);
+}
+
+.risk-badge.badge-suspicious,
+.risk-badge.risk-suspicious {
+    color: var(--risk-suspicious);
+    background: linear-gradient(
+        165deg,
+        rgba(0, 0, 0, 0.52) 0%,
+        rgba(12, 10, 8, 0.38) 100%
+    );
+    border-color: rgba(244, 162, 97, 0.32);
+}
+
+.risk-badge.badge-clone,
+.risk-badge.risk-clone {
+    color: var(--risk-clone);
+    background: linear-gradient(
+        165deg,
+        rgba(0, 0, 0, 0.52) 0%,
+        rgba(14, 8, 6, 0.38) 100%
+    );
+    border-color: rgba(231, 111, 81, 0.38);
+}
+
+.verdict.clean {
+    color: var(--risk-clean);
+    background: rgba(90, 107, 124, 0.16);
+}
+
+.verdict.suspicious {
+    color: var(--risk-suspicious);
+    background: rgba(244, 162, 97, 0.14);
+}
+
+.verdict.clone {
+    color: var(--risk-clone);
+    background: rgba(231, 111, 81, 0.14);
+}
+
+.verdict.neutral {
+    color: var(--risk-neutral);
+    background: rgba(139, 149, 165, 0.14);
+}
+
+.detail-panel {
+    padding: 0;
+}
+
+.fingerprint-detail-card {
+    display: flex;
+    gap: 20px;
+    padding: 22px;
+}
+
+.profile-avatar canvas {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+}
+
+.profile-row {
+    border-bottom: 1px solid var(--border);
+}
+
+.profile-row:last-child {
+    border-bottom: none;
+}
+
+.profile-value {
+    color: var(--text-primary);
+}
+
+.graph-container {
+    background: var(--water-surface);
+    border: 1px solid var(--water-border);
+    border-radius: 16px;
+    min-height: 300px;
+    overflow: hidden;
+    padding: 8px;
+    -webkit-backdrop-filter: var(--water-blur);
+    backdrop-filter: var(--water-blur);
+    box-shadow: var(--water-shine);
+}
+
+/* graph-container только если не внутри grid-item (Investigation) */
+.grid-item .graph-container {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.06);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.entropy-axis path,
+.entropy-axis line {
+    stroke: #2A2E38;
+}
+
+.entropy-axis text {
+    fill: #8B95A5;
+    font-family: var(--font-mono);
+    font-size: 10px;
+}
+
+.entropy-grid line {
+    stroke: rgba(255, 255, 255, 0.06);
+}
+
+.entropy-grid path {
+    display: none;
+}
+
+.entropy-dot {
+    filter: drop-shadow(0 0 6px rgba(45, 143, 110, 0.35));
+}
+
+.related-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.related-card {
+    display: grid;
+    align-items: start;
+    justify-content: stretch;
+    cursor: default;
+}
+
+.related-card-title {
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.related-card .btn {
+    justify-self: start;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.hash-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.hash-filter-btn.active {
+    background: rgba(45, 143, 110, 0.14);
+    border-color: rgba(45, 143, 110, 0.45);
+    color: var(--accent-hover);
+}
+
+.hash-registry-table tbody tr.hash-row {
+    cursor: pointer;
+}
+
+table {
+    min-width: 680px;
+}
+
+th {
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.32);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+td {
+    color: var(--text-primary);
+}
+
+tbody tr:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.015);
+}
+
+tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.035);
+}
+
+tbody tr:hover {
+    background: var(--bg-elevated);
+}
+
+.diff-col {
+    padding: 20px;
+}
+
+.diff-col.match {
+    border-color: rgba(231, 111, 81, 0.45);
+    background: var(--water-surface);
+    -webkit-backdrop-filter: var(--water-blur);
+    backdrop-filter: var(--water-blur);
+}
+
+#diffVerdict {
+    box-shadow: var(--shadow-card);
+}
+
+.empty-state {
+    display: flex;
+    min-height: 120px;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    color: var(--text-secondary);
+    text-align: center;
+    background: var(--water-surface);
+    border: 1px dashed var(--water-border);
+    border-radius: 16px;
+    -webkit-backdrop-filter: var(--water-blur);
+    backdrop-filter: var(--water-blur);
+    box-shadow: var(--water-shine);
+}
+
+/* empty-state внутри grid-item остаётся прозрачным — см. правило выше */
+.grid-item > .empty-state {
+    background: transparent;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+}
+
+#investigationPlaceholder.grid-item {
+    -webkit-backdrop-filter: var(--water-blur);
+    backdrop-filter: var(--water-blur);
+}
+
+.toast {
+    color: var(--text-primary);
+}
+
+@media (max-width: 1024px) {
+    .grid-item.col-3,
+    .grid-item.col-4,
+    .grid-item.col-6,
+    .grid-item.col-8 {
+        grid-column: span 12;
+    }
+
+    .fingerprint-detail-card {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 720px) {
+    .main {
+        padding: 18px;
+    }
+
+    .nav {
+        height: auto;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 14px 18px;
+    }
+
+    .nav-tabs {
+        order: 3;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .fingerprint-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

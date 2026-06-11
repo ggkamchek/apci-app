@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package apci.security.v1;
+
+option go_package = "github.com/black/apci-app/security-center/pkg/pb/apci/security/v1;securityv1";
+
+import "google/protobuf/timestamp.proto";
+
+// SecurityIngest receives async events from Chat API (fire-and-forget).
+service SecurityIngest {
+  rpc IngestEvent(IngestEventRequest) returns (IngestEventResponse);
+}
+
+message IngestEventRequest {
+  string event_id = 1;
+  string event_type = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+
+  // user.registered / user.logged_in
+  string user_id = 4;
+  string device_hash = 5;
+  reserved 6;
+  reserved "ip_hash";
+
+  // contact.added
+  string contact_id = 7;
+
+  // message.sent
+  string peer_user_id = 8;
+  string message_id = 9;
+}
+
+message IngestEventResponse {
+  bool accepted = 1;
+  bool duplicate = 2;
+}

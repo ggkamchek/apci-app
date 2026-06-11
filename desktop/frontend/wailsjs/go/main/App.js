@@ -17,3 +17,7 @@ export function Logout() {
 export function Register(arg1) {
   return window['go']['main']['App']['Register'](arg1);
 }
+
+export function SetFingerprintSignals(arg1) {
+  return window['go']['main']['App']['SetFingerprintSignals'](arg1);
+}

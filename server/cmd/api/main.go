@@ -15,6 +15,7 @@ import (
 	"github.com/black/apci-app/server/internal/config"
 	"github.com/black/apci-app/server/internal/db"
 	"github.com/black/apci-app/server/internal/migrate"
+	"github.com/black/apci-app/server/internal/securitycenter"
 	"github.com/black/apci-app/server/internal/users"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
@@ -43,9 +44,14 @@ func main() {
 		log.Fatalf("migrate: %v", err)
 	}
 
+	securityPublisher, err := securitycenter.NewPublisher(cfg.SecurityCenterAddr)
+	if err != nil {
+		log.Fatalf("security center client: %v", err)
+	}
+
 	userRepo := users.NewRepository(pool)
 	userService := users.NewService(userRepo, cfg.ChallengeTTL, cfg.SessionTTL)
-	userGRPC := users.NewGRPCServer(userService)
+	userGRPC := users.NewGRPCServer(userService, securityPublisher)
 
 	grpcServer := grpc.NewServer()
 	usersv1.RegisterUsersServiceServer(grpcServer, userGRPC)

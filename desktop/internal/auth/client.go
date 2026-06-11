@@ -4,8 +4,10 @@ import (
 	"context"
 	"crypto/ed25519"
 	"fmt"
+	"sync"
 	"time"
 
+	"github.com/black/apci-app/desktop/internal/fingerprint"
 	usersv1 "github.com/black/apci-app/server/pkg/pb/apci/users/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -23,6 +25,10 @@ type Client struct {
 	dataDir    string
 	grpcClient usersv1.UsersServiceClient
 	conn       *grpc.ClientConn
+
+	fpMu       sync.RWMutex
+	signals    fingerprint.Signals
+	hasSignals bool
 }
 
 func NewClient(addr, keysDir, dataDir string) (*Client, error) {
@@ -39,11 +45,31 @@ func NewClient(addr, keysDir, dataDir string) (*Client, error) {
 	}, nil
 }
 
+func (c *Client) SetFingerprintSignals(signals fingerprint.Signals) {
+	c.fpMu.Lock()
+	c.signals = signals
+	c.hasSignals = true
+	c.fpMu.Unlock()
+}
+
 func (c *Client) Close() error {
 	if c.conn != nil {
 		return c.conn.Close()
 	}
 	return nil
+}
+
+func (c *Client) deviceHash() (string, error) {
+	c.fpMu.RLock()
+	signals := c.signals
+	hasSignals := c.hasSignals
+	c.fpMu.RUnlock()
+
+	if !hasSignals {
+		return "", fmt.Errorf("fingerprint не готов — перезапустите приложение")
+	}
+
+	return fingerprint.DeviceHash(c.dataDir, signals)
 }
 
 func (c *Client) Register(ctx context.Context, username string) (Session, error) {
@@ -56,7 +82,7 @@ func (c *Client) Register(ctx context.Context, username string) (Session, error)
 		return Session{}, err
 	}
 
-	deviceHash, err := DeviceHash(c.dataDir)
+	deviceHash, err := c.deviceHash()
 	if err != nil {
 		return Session{}, err
 	}
@@ -83,7 +109,7 @@ func (c *Client) Login(ctx context.Context, username string) (Session, error) {
 		return Session{}, err
 	}
 
-	deviceHash, err := DeviceHash(c.dataDir)
+	deviceHash, err := c.deviceHash()
 	if err != nil {
 		return Session{}, err
 	}
@@ -124,6 +150,10 @@ func WithTimeout(parent context.Context, timeout time.Duration) (context.Context
 }
 
 func mapGRPCError(err error) error {
+	if err == nil {
+		return nil
+	}
+
 	if st, ok := status.FromError(err); ok {
 		switch st.Message() {
 		case "username already exists":

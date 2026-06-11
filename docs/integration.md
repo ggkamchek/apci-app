@@ -29,8 +29,8 @@
 ```
 1. Desktop → Chat API: Register
 2. Chat API: сохраняет пользователя, отвечает OK
-3. Chat API (goroutine): IngestEvent { user.registered, user_id, device_hash, ip_hash }
-4. Центр: создаёт узел; при совпадении hash — рёбра same_device / same_ip
+3. Chat API (goroutine): IngestEvent { user.registered, user_id, device_hash }
+4. Центр: создаёт узел; при совпадении hash — ребро same_device
 ```
 
 ### Вход
@@ -80,11 +80,8 @@ Presence и typing обрабатываются в Chat API и доставля�
 | Тип ребра | Условие | Вес |
 |-----------|---------|-----|
 | `same_device` | Одинаковый `device_hash` | Высокий |
-| `same_ip` | Одинаковый `ip_hash` | Низкий (информационный) |
 | `shared_contact` | Пересечение списков контактов | Средний |
 | `communicates_with` | Факт переписки (from/to) | Средний |
-
-> `same_ip` — слабый сигнал. VPN и общий Wi‑Fi дают ложные связи. В MVP не используется для блокировок.
 
 ---
 

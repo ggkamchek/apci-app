@@ -1,25 +1,22 @@
-# Документация APCI
-
-Техническая документация проекта **APCI** — десктопной коммуникационной платформы с архитектурной приватностью.
-
-**Команда:** Петя (модуль E2E), Sudeeneess (Центр Безопасности)
-
-## С чего начать
-
-| Документ | Содержание |
-|----------|------------|
-| [**getting-started.md**](./getting-started.md) | **Запуск локально:** Docker, API, desktop, типичные ошибки |
-| [overview.md](./overview.md) | Концепция платформы, философия, scope |
-| [mvp.md](./mvp.md) | Что входит в первую версию и что отложено |
-| [architecture.md](./architecture.md) | Компоненты, стек, границы доверия |
-| [integration.md](./integration.md) | Связь Chat API и Центр Безопасности |
-| [development.md](./development.md) | Git flow, структура репозитория |
-| [demo-scenarios.md](./demo-scenarios.md) | Сценарии демонстрации к защите диплома |
-| [modules/e2e.md](./modules/e2e.md) | Модуль E2E-шифрования |
-| [modules/security-center.md](./modules/security-center.md) | Центр Безопасности, анти-мультиаккаунтинг |
-
-## Принцип разделения scope
-
-- **MVP (диплом)** — то, что реализуем и демонстрируем на защите.
-- **Контекст продукта** — часть полного видения APCI, не входит в текущую реализацию.
-- **Roadmap** — следующие фазы после MVP.
+# Документация APCI
+
+## Запуск (каждый день)
+
+| Документ | Содержание |
+|----------|------------|
+| [**getting-started.md**](./getting-started.md) | **Единственный гайд по запуску:** `scripts/dev.ps1`, админка, desktop, ошибки |
+
+## Архитектура и модули (для разработки)
+
+| Документ | Содержание |
+|----------|------------|
+| [overview.md](./overview.md) | Концепция платформы |
+| [architecture.md](./architecture.md) | Компоненты, границы доверия |
+| [integration.md](./integration.md) | Chat API ↔ Центр Безопасности |
+| [development.md](./development.md) | Git flow, структура репо |
+| [mvp.md](./mvp.md) | Scope MVP |
+| [demo-scenarios.md](./demo-scenarios.md) | Сценарии для защиты |
+| [modules/e2e.md](./modules/e2e.md) | E2E (Петя) |
+| [modules/security-center.md](./modules/security-center.md) | Antifraud (Sudeeneess) |
+
+Центр Безопасности — краткий README: [../security-center/README.md](../security-center/README.md)
