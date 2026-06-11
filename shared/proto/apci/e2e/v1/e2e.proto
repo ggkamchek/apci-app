@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package apci.e2e.v1;
+
+option go_package = "github.com/black/apci-app/server/pkg/pb/apci/e2e/v1;e2ev1";
+
+import "google/protobuf/timestamp.proto";
+
+// E2E: relay сообщений и хранение public prekeys.
+//
+// Auth (все RPC): gRPC metadata "session-id" — сессия входа из
+// UsersService.CompleteLogin. Не путать с ratchet_session_id в теле запроса.
+//
+// chat_id: создаётся модулем chats; e2e только ссылается на него в сообщениях.
+//
+// ratchet_session_id: id crypto-сессии Double Ratchet (генерируется на клиенте).
+service E2EService {
+  // Загрузка X25519 prekey bundle после входа. Заменяет предыдущий bundle пользователя.
+  rpc UploadPreKeyBundle(UploadPreKeyBundleRequest) returns (UploadPreKeyBundleResponse);
+
+  // Получение prekey bundle другого пользователя для X3DH на клиенте.
+  rpc GetPreKeyBundle(GetPreKeyBundleRequest) returns (GetPreKeyBundleResponse);
+
+  // Отправка зашифрованного сообщения. Открытый текст только на клиенте.
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+
+  // Опрос входящих сообщений (MVP). Потоковая доставка — в roadmap.
+  rpc FetchMessages(FetchMessagesRequest) returns (FetchMessagesResponse);
+}
+
+message SignedPreKey {
+  uint32 key_id = 1;
+  bytes public_key = 2; // X25519, 32 байта
+  bytes signature = 3;  // подпись identity key
+  google.protobuf.Timestamp expires_at = 4;
+}
+
+message OneTimePreKey {
+  uint32 key_id = 1;
+  bytes public_key = 2; // X25519, 32 байта
+}
+
+message UploadPreKeyBundleRequest {
+  bytes identity_key = 1; // X25519 identity public key (не Ed25519 ключ auth)
+  SignedPreKey signed_prekey = 2;
+  repeated OneTimePreKey one_time_prekeys = 3;
+}
+
+message UploadPreKeyBundleResponse {
+  uint32 one_time_prekeys_accepted = 1;
+}
+
+message GetPreKeyBundleRequest {
+  string user_id = 1;
+}
+
+message GetPreKeyBundleResponse {
+  string user_id = 1;
+  bytes identity_key = 2;
+  uint32 signed_prekey_id = 3;
+  bytes signed_prekey = 4;
+  bytes signed_prekey_signature = 5;
+  uint32 one_time_prekey_id = 6; // 0, если one-time prekey недоступен
+  bytes one_time_prekey = 7;
+}
+
+message SendMessageRequest {
+  string recipient_id = 1;
+  string chat_id = 2;
+  string ratchet_session_id = 3;
+  bytes ciphertext = 4;
+  bytes ratchet_header = 5;
+}
+
+message SendMessageResponse {
+  string message_id = 1;
+  google.protobuf.Timestamp sent_at = 2;
+}
+
+message FetchMessagesRequest {
+  // Сообщения после этого id (не включая его). Пусто — с начала.
+  string since_message_id = 1;
+  uint32 limit = 2; // на сервере по умолчанию 50, если 0
+}
+
+message FetchMessagesResponse {
+  repeated EncryptedMessage messages = 1;
+}
+
+message EncryptedMessage {
+  string message_id = 1;
+  string chat_id = 2;
+  string ratchet_session_id = 3;
+  string sender_id = 4;
+  string recipient_id = 5;
+  bytes ciphertext = 6;
+  bytes ratchet_header = 7;
+  google.protobuf.Timestamp sent_at = 8;
+}
