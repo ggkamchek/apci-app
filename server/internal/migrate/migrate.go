@@ -10,7 +10,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-const migrationVersion int64 = 1
+var migrationFiles = []struct {
+	version int64
+	file    string
+}{
+	{version: 1, file: "001_users.sql"},
+	{version: 2, file: "002_e2e.sql"},
+}
 
 func Up(ctx context.Context, pool *pgxpool.Pool, migrationsDir string) error {
 	if err := ensureMigrationsTable(ctx, pool); err != nil {
@@ -22,32 +28,37 @@ func Up(ctx context.Context, pool *pgxpool.Pool, migrationsDir string) error {
 		return err
 	}
 
-	if applied >= migrationVersion {
-		return nil
-	}
+	for _, migration := range migrationFiles {
+		if applied >= migration.version {
+			continue
+		}
 
-	sqlPath := filepath.Join(migrationsDir, "001_users.sql")
-	content, err := os.ReadFile(sqlPath)
-	if err != nil {
-		return fmt.Errorf("read migration: %w", err)
-	}
+		sqlPath := filepath.Join(migrationsDir, migration.file)
+		content, err := os.ReadFile(sqlPath)
+		if err != nil {
+			return fmt.Errorf("read migration %s: %w", migration.file, err)
+		}
 
-	tx, err := pool.Begin(ctx)
-	if err != nil {
-		return fmt.Errorf("begin migration tx: %w", err)
-	}
-	defer tx.Rollback(ctx)
+		tx, err := pool.Begin(ctx)
+		if err != nil {
+			return fmt.Errorf("begin migration tx: %w", err)
+		}
 
-	if _, err := tx.Exec(ctx, string(content)); err != nil {
-		return fmt.Errorf("apply migration: %w", err)
-	}
+		if _, err := tx.Exec(ctx, string(content)); err != nil {
+			tx.Rollback(ctx)
+			return fmt.Errorf("apply migration %s: %w", migration.file, err)
+		}
 
-	if _, err := tx.Exec(ctx, `INSERT INTO schema_migrations (version) VALUES ($1)`, migrationVersion); err != nil {
-		return fmt.Errorf("record migration: %w", err)
-	}
+		if _, err := tx.Exec(ctx, `INSERT INTO schema_migrations (version) VALUES ($1)`, migration.version); err != nil {
+			tx.Rollback(ctx)
+			return fmt.Errorf("record migration %d: %w", migration.version, err)
+		}
 
-	if err := tx.Commit(ctx); err != nil {
-		return fmt.Errorf("commit migration: %w", err)
+		if err := tx.Commit(ctx); err != nil {
+			return fmt.Errorf("commit migration %s: %w", migration.file, err)
+		}
+
+		applied = migration.version
 	}
 
 	return nil

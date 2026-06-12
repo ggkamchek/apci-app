@@ -11,9 +11,12 @@ import (
 	"syscall"
 	"time"
 
+	e2ev1 "github.com/black/apci-app/server/pkg/pb/apci/e2e/v1"
 	usersv1 "github.com/black/apci-app/server/pkg/pb/apci/users/v1"
+	"github.com/black/apci-app/server/internal/auth"
 	"github.com/black/apci-app/server/internal/config"
 	"github.com/black/apci-app/server/internal/db"
+	"github.com/black/apci-app/server/internal/e2e"
 	"github.com/black/apci-app/server/internal/migrate"
 	"github.com/black/apci-app/server/internal/securitycenter"
 	"github.com/black/apci-app/server/internal/users"
@@ -53,8 +56,15 @@ func main() {
 	userService := users.NewService(userRepo, cfg.ChallengeTTL, cfg.SessionTTL)
 	userGRPC := users.NewGRPCServer(userService, securityPublisher)
 
-	grpcServer := grpc.NewServer()
+	e2eRepo := e2e.NewRepository(pool)
+	e2eService := e2e.NewService(e2eRepo, userRepo)
+	e2eGRPC := e2e.NewGRPCServer(e2eService)
+
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(auth.UnarySessionInterceptor(userService)),
+	)
 	usersv1.RegisterUsersServiceServer(grpcServer, userGRPC)
+	e2ev1.RegisterE2EServiceServer(grpcServer, e2eGRPC)
 	reflection.Register(grpcServer)
 
 	grpcListener, err := net.Listen("tcp", cfg.GRPCAddr)

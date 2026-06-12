@@ -12,9 +12,10 @@ import (
 )
 
 var (
-	ErrNotFound      = errors.New("user not found")
-	ErrAlreadyExists = errors.New("username already exists")
-	ErrChallenge     = errors.New("challenge not found or expired")
+	ErrNotFound       = errors.New("user not found")
+	ErrAlreadyExists  = errors.New("username already exists")
+	ErrChallenge      = errors.New("challenge not found or expired")
+	ErrInvalidSession = errors.New("session not found or expired")
 )
 
 type User struct {
@@ -134,6 +135,39 @@ func (r *Repository) DeleteChallenge(ctx context.Context, challengeID string) er
 		return fmt.Errorf("delete challenge: %w", err)
 	}
 	return nil
+}
+
+func (r *Repository) GetByID(ctx context.Context, userID string) (User, error) {
+	row := r.pool.QueryRow(ctx, `
+		SELECT id::text, username, ed25519_public_key
+		FROM users
+		WHERE id = $1::uuid
+	`, userID)
+
+	var user User
+	if err := row.Scan(&user.ID, &user.Username, &user.Ed25519PublicKey); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return User{}, ErrNotFound
+		}
+		return User{}, fmt.Errorf("get user by id: %w", err)
+	}
+	return user, nil
+}
+
+func (r *Repository) GetSessionUserID(ctx context.Context, sessionID string, now time.Time) (string, error) {
+	var userID string
+	err := r.pool.QueryRow(ctx, `
+		SELECT user_id::text
+		FROM sessions
+		WHERE id = $1::uuid AND expires_at > $2
+	`, sessionID, now).Scan(&userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", ErrInvalidSession
+		}
+		return "", fmt.Errorf("get session: %w", err)
+	}
+	return userID, nil
 }
 
 func (r *Repository) CreateSession(ctx context.Context, userID string, expiresAt time.Time) (string, error) {

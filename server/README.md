@@ -1,6 +1,6 @@
 # Chat API
 
-Go-сервер: HTTP health + gRPC UsersService (регистрация и вход).
+Go-сервер: HTTP health + gRPC UsersService (регистрация и вход) + E2EService (prekeys и relay ciphertext).
 
 **Запуск и решение проблем:** [docs/getting-started.md](../docs/getting-started.md)
 
@@ -55,6 +55,14 @@ Proto: `shared/proto/apci/e2e/v1/e2e.proto`
 **Metadata (все RPC):** `session-id` — сессия входа из `CompleteLogin`.
 
 **Поля:** `chat_id` — из модуля chats; `ratchet_session_id` — id crypto-сессии Double Ratchet (не сессия входа).
+
+**Auth E2E:** все RPC требуют metadata `session-id` (UUID из `CompleteLogin`).
+
+Проверка списка сервисов:
+
+```powershell
+grpcurl -plaintext localhost:50051 list
+```
 
 ---
 

@@ -156,6 +156,14 @@ func (s *Service) CompleteLogin(ctx context.Context, input CompleteLoginInput) (
 	}, nil
 }
 
+func (s *Service) ValidateSession(ctx context.Context, sessionID string) (string, error) {
+	sessionID = strings.TrimSpace(sessionID)
+	if sessionID == "" {
+		return "", fmt.Errorf("session_id is required")
+	}
+	return s.repo.GetSessionUserID(ctx, sessionID, s.now().UTC())
+}
+
 func normalizeUsername(username string) string {
 	return strings.TrimSpace(username)
 }
