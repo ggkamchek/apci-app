@@ -5,6 +5,12 @@ import {fingerprint} from '../models';
 
 export function CurrentUser():Promise<main.AuthResult>;
 
+export function E2EInbox(arg1:string,arg2:number):Promise<main.E2EInboxResult>;
+
+export function E2EInit():Promise<main.E2EResult>;
+
+export function E2ESend(arg1:string,arg2:string,arg3:string):Promise<main.E2ESendResult>;
+
 export function Login(arg1:string):Promise<main.AuthResult>;
 
 export function Logout():Promise<void>;

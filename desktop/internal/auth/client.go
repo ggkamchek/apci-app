@@ -59,6 +59,10 @@ func (c *Client) Close() error {
 	return nil
 }
 
+func (c *Client) Conn() *grpc.ClientConn {
+	return c.conn
+}
+
 func (c *Client) deviceHash() (string, error) {
 	c.fpMu.RLock()
 	signals := c.signals

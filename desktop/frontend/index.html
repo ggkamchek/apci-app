@@ -33,6 +33,41 @@
             <p class="welcome">Привет, <strong id="display-username"></strong>!</p>
             <p class="meta">ID: <span id="display-userid"></span></p>
             <p class="meta">Сессия активна</p>
+
+            <div class="divider"></div>
+
+            <div class="e2e">
+                <p class="subtitle" style="margin-bottom: 12px;">E2E (MVP)</p>
+                <p id="e2e-status" class="meta">—</p>
+
+                <button id="e2e-init-btn" class="btn primary" type="button">E2EInit (Upload bundle)</button>
+
+                <label class="field" style="margin-top: 14px;">
+                    <span>Recipient user_id (UUID)</span>
+                    <input id="e2e-recipient" type="text" list="e2e-recipients" placeholder="например, cde06a89-..." />
+                    <datalist id="e2e-recipients"></datalist>
+                </label>
+
+                <div class="chips">
+                    <span class="chip-label">Недавние:</span>
+                    <div id="e2e-recent" class="chip-row"></div>
+                </div>
+
+                <label class="field">
+                    <span>Сообщение</span>
+                    <textarea id="e2e-plaintext" rows="3" placeholder="привет"></textarea>
+                </label>
+
+                <button id="e2e-send-btn" class="btn primary" type="button">Отправить</button>
+
+                <div class="row">
+                    <button id="e2e-inbox-btn" class="btn secondary" type="button">Inbox (Fetch + decrypt)</button>
+                    <button id="e2e-clear-btn" class="btn secondary" type="button">Очистить</button>
+                </div>
+
+                <div id="e2e-messages" class="messages"></div>
+            </div>
+
             <button id="logout-btn" class="btn secondary" type="button">Выйти</button>
         </div>
     </div>

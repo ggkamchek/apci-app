@@ -48,6 +48,61 @@ body {
     text-align: center;
 }
 
+.divider {
+    height: 1px;
+    background: var(--border);
+    margin: 18px 0;
+}
+
+.e2e {
+    text-align: left;
+}
+
+.row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.row .btn {
+    width: 50%;
+    margin-top: 0;
+}
+
+.chips {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: -6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.chip-label {
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.chip-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    border: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.12);
+    color: var(--text);
+    font-size: 0.75rem;
+    padding: 6px 8px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.chip:hover {
+    border-color: var(--muted);
+}
+
 .logo {
     font-size: 1.75rem;
     font-weight: 700;
@@ -97,6 +152,23 @@ input {
 }
 
 input:focus {
+    border-color: var(--accent);
+}
+
+textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 0.95rem;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+    resize: vertical;
+}
+
+textarea:focus {
     border-color: var(--accent);
 }
 
@@ -156,4 +228,36 @@ input:focus {
 
 .error.hidden {
     display: none;
+}
+
+.messages {
+    margin-top: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.15);
+    max-height: 180px;
+    overflow: auto;
+    font-size: 0.85rem;
+}
+
+.msg {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.msg:last-child {
+    border-bottom: none;
+}
+
+.msg .who {
+    color: var(--muted);
+    font-size: 0.75rem;
+    word-break: break-all;
+    margin-bottom: 4px;
+}
+
+.msg .text {
+    white-space: pre-wrap;
+    word-break: break-word;
 }
