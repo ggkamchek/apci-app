@@ -19,10 +19,9 @@ func (r *Repository) GetStats(ctx context.Context) (Stats, error) {
 				GROUP BY device_hash
 				HAVING COUNT(DISTINCT user_id) > 1
 			) clone_devices),
-			(SELECT COUNT(*) FROM account_links WHERE link_type <> 'same_ip'),
+			(SELECT COUNT(*) FROM account_links),
 			(SELECT COUNT(*) FROM account_links
-				WHERE link_type <> 'same_ip'
-				  AND detected_at >= now() - interval '1 hour'),
+				WHERE detected_at >= now() - interval '1 hour'),
 			(SELECT COUNT(*) FROM (
 				SELECT device_hash
 				FROM user_devices
@@ -190,8 +189,7 @@ func (r *Repository) ActivitySeries(ctx context.Context, hours int) ([]ActivityP
 			h.hour,
 			COALESCE((SELECT COUNT(*) FROM ingested_events e WHERE date_trunc('hour', e.received_at) = h.hour), 0),
 			COALESCE((SELECT COUNT(*) FROM account_links l
-				WHERE link_type <> 'same_ip'
-				  AND date_trunc('hour', l.detected_at) = h.hour), 0),
+				WHERE date_trunc('hour', l.detected_at) = h.hour), 0),
 			COALESCE((SELECT COUNT(DISTINCT user_id) FROM user_devices WHERE date_trunc('hour', last_seen_at) = h.hour), 0)
 		FROM hours h
 		ORDER BY h.hour
@@ -562,7 +560,6 @@ func (r *Repository) ListLinksForAccount(ctx context.Context, userID string) ([]
 		SELECT account_a::text, account_b::text, link_type, weight, detected_at
 		FROM account_links
 		WHERE (account_a = $1::uuid OR account_b = $1::uuid)
-		  AND link_type <> 'same_ip'
 		ORDER BY weight DESC, detected_at DESC
 	`, userID)
 	if err != nil {

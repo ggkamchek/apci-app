@@ -44,7 +44,7 @@ type E2EServiceClient interface {
 	GetPreKeyBundle(ctx context.Context, in *GetPreKeyBundleRequest, opts ...grpc.CallOption) (*GetPreKeyBundleResponse, error)
 	// Отправка зашифрованного сообщения. Открытый текст только на клиенте.
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
-	// Опрос входящих сообщений (MVP). Потоковая доставка — в roadmap.
+	// Опрос входящих сообщений (v0). Потоковая доставка планируется отдельно.
 	FetchMessages(ctx context.Context, in *FetchMessagesRequest, opts ...grpc.CallOption) (*FetchMessagesResponse, error)
 }
 
@@ -115,7 +115,7 @@ type E2EServiceServer interface {
 	GetPreKeyBundle(context.Context, *GetPreKeyBundleRequest) (*GetPreKeyBundleResponse, error)
 	// Отправка зашифрованного сообщения. Открытый текст только на клиенте.
 	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
-	// Опрос входящих сообщений (MVP). Потоковая доставка — в roadmap.
+	// Опрос входящих сообщений (v0). Потоковая доставка планируется отдельно.
 	FetchMessages(context.Context, *FetchMessagesRequest) (*FetchMessagesResponse, error)
 	mustEmbedUnimplementedE2EServiceServer()
 }

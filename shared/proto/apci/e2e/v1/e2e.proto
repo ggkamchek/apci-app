@@ -24,7 +24,7 @@ service E2EService {
   // Отправка зашифрованного сообщения. Открытый текст только на клиенте.
   rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
 
-  // Опрос входящих сообщений (MVP). Потоковая доставка — в roadmap.
+  // Опрос входящих сообщений (v0). Потоковая доставка планируется отдельно.
   rpc FetchMessages(FetchMessagesRequest) returns (FetchMessagesResponse);
 }
 

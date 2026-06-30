@@ -97,7 +97,6 @@ func (r *Repository) ListLinks(ctx context.Context) ([]Link, error) {
 	rows, err := r.pool.Query(ctx, `
 		SELECT account_a::text, account_b::text, link_type, weight, detected_at
 		FROM account_links
-		WHERE link_type <> 'same_ip'
 		ORDER BY detected_at DESC
 	`)
 	if err != nil {

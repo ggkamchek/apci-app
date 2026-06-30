@@ -2,7 +2,7 @@
 
 Отдельный сервис: ingest событий от Chat API, граф связей, web-админка.
 
-**Запуск:** не отдельно — используйте из корня репозитория:
+**Запуск:** из корня репозитория:
 
 ```powershell
 .\scripts\dev.ps1
@@ -24,14 +24,14 @@
 
 ---
 
-## События (MVP)
+## События ingest
 
-| event_type | Источник |
-|------------|----------|
-| `user.registered` | Chat API после регистрации |
-| `user.logged_in` | Chat API после входа |
-| `contact.added` | позже |
-| `message.sent` | позже |
+| event_type | Источник | Статус |
+|------------|----------|--------|
+| `user.registered` | Chat API после регистрации | ✅ |
+| `user.logged_in` | Chat API после входа | ✅ |
+| `contact.added` | Chat API после добавления контакта | 📋 |
+| `message.sent` | Chat API после сохранения ciphertext | 📋 |
 
 ---
 
@@ -47,3 +47,5 @@
 Auth: `Authorization: Bearer <SECURITY_ADMIN_TOKEN>`
 
 Proto: `shared/proto/apci/security/v1/ingest.proto`
+
+Документация модуля: [docs/modules/security-center.md](../docs/modules/security-center.md)

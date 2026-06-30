@@ -6,10 +6,8 @@
 
 ```
 main
- └── develop
-      ├── module/e2e
-      │    └── feature/<название>
-      └── module/antifraud
+ └── develop              # стабильная интеграция всех модулей
+      └── apci-future     # активная разработка продукта
            └── feature/<название>
 ```
 
@@ -18,23 +16,24 @@ main
 | Ветка | Назначение |
 |-------|------------|
 | `main` | Стабильный код, релизы |
-| `develop` | Интеграция всех модулей |
-| `module/<имя-модуля>` | Долгоживущая ветка модуля |
+| `develop` | Интеграция проверенных изменений |
+| `apci-future` | Текущая рабочая ветка: новые фичи, рефакторинг, документация |
+| `module/<имя-модуля>` | Долгоживущая ветка модуля (при необходимости) |
 | `feature/<название>` | Конкретная задача |
 
 ### Merge flow
 
 ```
-feature/* → module/* → develop → main
+feature/* → apci-future → develop → main
 ```
 
-Имена людей в ветках **не используются** — только имена модулей.
+Имена людей в ветках **не используются** — только имена модулей или задач.
 
 ### Примеры веток
 
-- `module/e2e` → `feature/double-ratchet-session`
-- `module/antifraud` → `feature/device-fingerprint`
-- `module/antifraud` → `feature/admin-links-table`
+- `apci-future` → `feature/e2e-group-chat`
+- `apci-future` → `feature/security-ingest-messages`
+- `module/antifraud` → `feature/admin-investigation` (историческая ветка модуля)
 
 ---
 
@@ -48,6 +47,7 @@ feature/* → module/* → develop → main
 │   │   ├── users/
 │   │   ├── e2e/
 │   │   ├── gateway/
+│   │   ├── securitycenter/
 │   │   └── chats/
 │   └── migrations/
 ├── security-center/         # Центр Безопасности (отдельный бинарник)
@@ -61,9 +61,11 @@ feature/* → module/* → develop → main
 │   ├── internal/
 │   │   ├── crypto/          # E2E
 │   │   └── fingerprint/     # device hash
-│   └── frontend/            # React UI
+│   └── frontend/
 ├── shared/
 │   └── proto/               # gRPC контракты
+├── scripts/
+│   └── dev.ps1              # Локальный запуск
 └── docs/
 ```
 
@@ -71,11 +73,11 @@ feature/* → module/* → develop → main
 
 ## Владельцы модулей
 
-| Модуль | Владелец | Ветка |
-|--------|----------|-------|
-| E2E | Петя | `module/e2e` |
-| Центр Безопасности | Sudeeneess | `module/antifraud` |
-| Users, Gateway, Chats | общий минимум | `develop` / по договорённости |
+| Модуль | Владелец |
+|--------|----------|
+| E2E | Петя |
+| Центр Безопасности | Sudeeneess |
+| Users, Gateway, инфраструктура | общая разработка |
 
 ---
 
@@ -91,4 +93,4 @@ feature/* → module/* → develop → main
 
 ## Быстрый старт
 
-См. корневой [README.md](../README.md) для Docker и запуска Chat API.
+См. [getting-started.md](./getting-started.md) и корневой [README.md](../README.md).

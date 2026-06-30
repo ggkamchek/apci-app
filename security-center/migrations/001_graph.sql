@@ -22,16 +22,6 @@ CREATE TABLE IF NOT EXISTS user_devices (
 
 CREATE INDEX IF NOT EXISTS user_devices_device_hash_idx ON user_devices(device_hash);
 
-CREATE TABLE IF NOT EXISTS user_ips (
-    user_id       UUID NOT NULL REFERENCES account_nodes(user_id) ON DELETE CASCADE,
-    ip_hash       TEXT NOT NULL,
-    first_seen_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    last_seen_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    PRIMARY KEY (user_id, ip_hash)
-);
-
-CREATE INDEX IF NOT EXISTS user_ips_ip_hash_idx ON user_ips(ip_hash);
-
 -- Undirected link: account_a < account_b (lexicographic UUID order).
 CREATE TABLE IF NOT EXISTS account_links (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),

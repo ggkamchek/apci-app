@@ -74,8 +74,8 @@
 | Клиент | Wails v2 + React |
 | БД | PostgreSQL (две инстанции: чаты и безопасность) |
 | Транспорт | gRPC + protobuf |
-| Ops | HTTP `GET /health` только для healthcheck Docker |
-| Кэш/очередь | Redis — Roadmap |
+| Ops | HTTP `GET /health` для локальной проверки и healthcheck |
+| Кэш/очередь | Outbox в PostgreSQL; Redis — возможный следующий этап |
 
 ---
 
@@ -96,10 +96,10 @@
 
 ## Безопасность канала и учётных данных
 
-- Транспорт: **TLS 1.3**
-- Пароли: **Argon2id**
-- Аутентификация: **Ed25519** (целевая схема)
-- E2E: **Double Ratchet**, X25519, AES-256-GCM
+- Локальная среда разработки использует plaintext gRPC (`localhost`).
+- Для production нужен TLS 1.3 / mTLS между сервисами.
+- Пароли не используются: вход построен на **Ed25519 challenge-response**.
+- E2E v0 использует X25519 + HKDF-SHA256 + AES-256-GCM; целевая схема — Double Ratchet.
 
 ---
 

@@ -179,8 +179,8 @@ type E2EInboxMessage struct {
 }
 
 type E2EInboxResult struct {
-	Success  bool            `json:"success"`
-	Message  string          `json:"message"`
+	Success  bool              `json:"success"`
+	Message  string            `json:"message"`
 	Messages []E2EInboxMessage `json:"messages,omitempty"`
 }
 
@@ -215,10 +215,10 @@ func (a *App) E2EInit() E2EResult {
 	req := &e2ev1.UploadPreKeyBundleRequest{
 		IdentityKey: identityPub,
 		SignedPrekey: &e2ev1.SignedPreKey{
-			KeyId:      spkID,
-			PublicKey:  spkPub,
-			Signature:  spkSig,
-			ExpiresAt:  timestamppb.New(time.Unix(spkExpUnix, 0)),
+			KeyId:     spkID,
+			PublicKey: spkPub,
+			Signature: spkSig,
+			ExpiresAt: timestamppb.New(time.Unix(spkExpUnix, 0)),
 		},
 	}
 
@@ -260,7 +260,7 @@ func (a *App) E2ESend(recipientID string, chatID string, plaintext string) E2ESe
 		return E2ESendResult{Success: false, Message: "текст сообщения обязателен"}
 	}
 	if chatID == "" {
-		// MVP: пока нет chats модуля — делаем детерминированный chat_id.
+		// V0: пока нет chats модуля — делаем детерминированный chat_id.
 		if sess.UserID < recipientID {
 			chatID = "mvp:" + sess.UserID + ":" + recipientID
 		} else {
@@ -281,7 +281,7 @@ func (a *App) E2ESend(recipientID string, chatID string, plaintext string) E2ESe
 		return E2ESendResult{Success: false, Message: err.Error()}
 	}
 
-	ct, hdr, err := crypto.EncryptMVP(st, bundle.GetIdentityKey(), []byte(plaintext))
+	ct, hdr, err := crypto.EncryptV0(st, bundle.GetIdentityKey(), []byte(plaintext))
 	if err != nil {
 		return E2ESendResult{Success: false, Message: err.Error()}
 	}
@@ -335,7 +335,7 @@ func (a *App) E2EInbox(sinceMessageID string, limit uint32) E2EInboxResult {
 			// Skip malformed message but keep going.
 			continue
 		}
-		pt, err := crypto.DecryptMVP(st, senderPub, m.GetRatchetHeader(), m.GetCiphertext())
+		pt, err := crypto.DecryptV0(st, senderPub, m.GetRatchetHeader(), m.GetCiphertext())
 		if err != nil {
 			continue
 		}

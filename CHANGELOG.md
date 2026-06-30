@@ -21,7 +21,7 @@
 
 - **Центр Безопасности** — отдельный сервис `security-center/` (gRPC ingest + граф + admin UI)
   - `SecurityIngest.IngestEvent` — приём событий от Chat API (`shared/proto/apci/security/v1/ingest.proto`)
-  - События MVP: `user.registered`, `user.logged_in`
+  - События v0: `user.registered`, `user.logged_in`
   - Граф связей: `same_device`, `shared_contact`
   - Web-админка (русский UI): http://localhost:8081/admin/
   - Миграция `001_graph.sql`, отдельная PostgreSQL (`:5434`)
@@ -46,7 +46,7 @@
   - `UploadPreKeyBundle` — загрузка X25519 prekeys (identity, signed, one-time)
   - `GetPreKeyBundle` — получение bundle собеседника для X3DH
   - `SendMessage` — отправка ciphertext и ratchet header
-  - `FetchMessages` — poll входящих сообщений (MVP)
+  - `FetchMessages` — poll входящих сообщений (v0)
 - Сгенерированный Go-код: `server/pkg/pb/apci/e2e/v1/` (`e2e.pb.go`, `e2e_grpc.pb.go`)
 - Документация по `E2EService` и команде `protoc` в `server/README.md`
 - `CHANGELOG.md`
@@ -93,7 +93,7 @@
 
 - Инициализация монорепозитория `apci-app`
 - Структура каталогов: `server/`, `desktop/`, `shared/`, `docs/`
-- Документация платформы: overview, architecture, MVP, integration, модули E2E и Центра Безопасности
+- Документация платформы: overview, architecture, roadmap, integration, модули E2E и Центра Безопасности
 - README с описанием стека и модулей
 
 [Unreleased]: https://github.com/ggkamchek/apci-app/compare/v0.4.0...HEAD

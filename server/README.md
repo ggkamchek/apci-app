@@ -50,7 +50,7 @@ Proto: `shared/proto/apci/e2e/v1/e2e.proto`
 | `UploadPreKeyBundle` | X25519 identity + signed/one-time prekeys |
 | `GetPreKeyBundle` | prekey bundle другого пользователя (X3DH) |
 | `SendMessage` | ciphertext + ratchet header |
-| `FetchMessages` | poll входящих (MVP) |
+| `FetchMessages` | poll входящих сообщений (v0; realtime-доставка планируется отдельно) |
 
 **Metadata (все RPC):** `session-id` — сессия входа из `CompleteLogin`.
 

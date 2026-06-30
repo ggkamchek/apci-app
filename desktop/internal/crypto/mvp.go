@@ -16,7 +16,7 @@ import (
 	"golang.org/x/crypto/hkdf"
 )
 
-// MVP crypto:
+// V0 crypto:
 // - Identity key: X25519
 // - Message encryption: X25519(shared) -> HKDF-SHA256 -> AES-256-GCM
 // - ratchet_header carries (sender_identity_pub, nonce)
@@ -34,7 +34,7 @@ type Identity struct {
 
 type State struct {
 	Identity Identity `json:"identity"`
-	// Prekeys are kept for UploadPreKeyBundle; for MVP we don't consume them.
+	// Prekeys are kept for UploadPreKeyBundle; V0 encryption does not consume them yet.
 	SignedPreKeyPrivB64 string    `json:"signedPreKeyPriv,omitempty"`
 	SignedPreKeyPubB64  string    `json:"signedPreKeyPub,omitempty"`
 	SignedPreKeyID      uint32    `json:"signedPreKeyId,omitempty"`
@@ -116,7 +116,7 @@ func newState() (State, error) {
 		return State{}, err
 	}
 
-	// Signed prekey (MVP: signature is random bytes, server doesn't verify).
+	// Signed prekey (V0: signature is random bytes, server doesn't verify it yet).
 	spkPriv, err := curve.GenerateKey(rand.Reader)
 	if err != nil {
 		return State{}, err
@@ -191,7 +191,7 @@ func BuildUploadBundle(st State) (identityPub []byte, signedPreKeyPub []byte, si
 	return identityPub, signedPreKeyPub, signedPreKeySig, st.SignedPreKeyID, st.SignedPreKeyExpUnix, oneTimes, nil
 }
 
-func EncryptMVP(st State, recipientIdentityPub []byte, plaintext []byte) (ciphertext []byte, headerBytes []byte, err error) {
+func EncryptV0(st State, recipientIdentityPub []byte, plaintext []byte) (ciphertext []byte, headerBytes []byte, err error) {
 	if len(plaintext) == 0 {
 		return nil, nil, fmt.Errorf("plaintext is required")
 	}
@@ -247,7 +247,7 @@ func EncryptMVP(st State, recipientIdentityPub []byte, plaintext []byte) (cipher
 	return ct, hb, nil
 }
 
-func DecryptMVP(st State, senderIdentityPub []byte, headerBytes []byte, ciphertext []byte) ([]byte, error) {
+func DecryptV0(st State, senderIdentityPub []byte, headerBytes []byte, ciphertext []byte) ([]byte, error) {
 	if len(ciphertext) == 0 {
 		return nil, fmt.Errorf("ciphertext is required")
 	}
@@ -323,4 +323,3 @@ func b64(b []byte) string { return base64.StdEncoding.EncodeToString(b) }
 func b64d(s string) ([]byte, error) {
 	return base64.StdEncoding.DecodeString(s)
 }
-
